@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#08090a" />
+<meta name="referrer" content="no-referrer" />
 <meta name="description" content="CPC Dubai — an independent cinematic concept for a premium automotive modification atelier." />
 <meta property="og:title" content="CPC Dubai — Automotive Atelier" />
 <meta property="og:description" content="A cinematic digital showroom concept for premium automotive modification in Dubai." />
@@ -121,7 +122,7 @@ vids.forEach(v=>{
   const media=v.closest('.media');const ready=()=>media&&media.classList.add('ready');
   v.addEventListener('loadeddata',ready,{once:true});v.addEventListener('playing',ready,{once:true});
   v.addEventListener('canplay',()=>{if(visibleVids.has(v))rebalance()});
-  v.addEventListener('error',()=>{visibleVids.delete(v);pendingVids.delete(v);videoObs.unobserve(v);loadObs.unobserve(v);media&&media.classList.remove('ready');v.remove()},{once:true});
+  let tries=0;v.addEventListener('error',()=>{if(tries++<2){const base=(v.getAttribute('src')||'').split('?')[0];setTimeout(()=>{v.src=base+'?r='+tries+Date.now();v.load();if(visibleVids.has(v))playVid(v)},1200*tries);return}console.warn('CPC video failed to load:',v.getAttribute('src'));visibleVids.delete(v);pendingVids.delete(v);videoObs.unobserve(v);loadObs.unobserve(v);media&&media.classList.remove('ready');v.remove()});
   if(!v.getAttribute('src'))loadObs.observe(v);
   videoObs.observe(v)});
 const retryPending=()=>{if(!pendingVids.size)return;const l=[...pendingVids];pendingVids.clear();l.forEach(v=>visibleVids.has(v)&&playVid(v))};
